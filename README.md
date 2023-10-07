@@ -1,31 +1,111 @@
-# IDS706-python-template [![CI](https://github.com/nogibjj/IDS706-python-template/actions/workflows/ci.yml/badge.svg)](https://github.com/nogibjj/IDS706-python-template/actions/workflows/ci.yml)
+# Week 6: Complex SQL Query for a MySQL Databas[![CI](https://github.com/nogibjj/ids706-week6-sql/actions/workflows/ci.yml/badge.svg)](https://github.com/nogibjj/ids706-week6-sql/actions/workflows/ci.yml)
 
-Mini-project 1. 
+## Project Description
 
-## Features
-- Environment Setup: Utilizes .devcontainer to set up a development environment in codespaces, ensuring consistent development environments across contributors.
-- Automated Workflow: Uses a Makefile to automate common tasks such as installation, testing, formatting, and linting.
-- Continuous Integration: Integrated with GitHub Actions to automate testing and other checks on push or pull request.
-- Base Libraries: Includes a foundational set of libraries for DevOps and web development, listed in requirements.txt.
+This project involves creating a complex SQL query to analyze data from a movie database. The query computes the count and average length of movies in each category.
 
-## Repository Structure
-- main.py: The main Python script of the project.
-- test_main.py: Tests associated with the main.py script.
-- .devcontainer: Configuration for setting up a development environment in codespaces.
-- .github: Configuration for GitHub Actions and other GitHub-related settings.
-- requirements.txt: Lists the Python libraries and their versions required for this project.
-- Makefile: Script to automate common tasks.
+## Requirements
 
-## Getting Started
+1. Design a complex SQL query involving joins, aggregation, and sorting.
+2. Provide an explanation for what the query is doing and the expected results.
 
-1. Create a New Repository: Use this repository as a template to create a new repository.
-2. Clone the Repository: Clone the new repository to your local machine.
-3. Branching: Always create a new branch for your tasks or features.
-4. Development: Make the necessary changes or additions to the project.
-5. Commit and Push: Commit your changes and push them to the repository.
-6. Pull Requests: Create a pull request to merge your changes into the main branch.
-7. Code Review: Ensure your code is reviewed and all checks pass before merging.
-8. Clean-Up: After merging, delete the feature or task branch to keep the repository clean.
+## Grading Criteria
 
-## Contribution
-Contributions are welcome! Please ensure you follow the outlined process for development and adhere to best practices.
+- Query functionality (20 points)
+- Explanation and documentation (20 points)
+
+## Deliverables
+
+- SQL query
+- Written or video explanation of the query
+
+## Setup Instructions
+
+### Database Setup
+
+1. Create the `categories` and `movies` tables using the provided SQL script.
+2. Populate the tables with the provided data.
+
+```sql
+CREATE TABLE categories (
+  category_id INTEGER PRIMARY KEY,
+  category_name TEXT NOT NULL
+);
+
+INSERT INTO categories VALUES (1, 'Action');
+INSERT INTO categories VALUES (2, 'Comedy');
+INSERT INTO categories VALUES (3, 'Drama');
+INSERT INTO categories VALUES (4, 'Romance');
+
+CREATE TABLE movies (
+  movie_id INTEGER PRIMARY KEY,
+  movie_name TEXT NOT NULL,
+  category_id INTEGER NOT NULL,
+  length INTEGER NOT NULL,
+  FOREIGN KEY (category_id) REFERENCES categories(category_id)
+);
+
+INSERT INTO movies VALUES (1, 'Movie A', 1, 120);
+INSERT INTO movies VALUES (2, 'Movie B', 1, 150);
+INSERT INTO movies VALUES (3, 'Movie C', 2, 90);
+INSERT INTO movies VALUES (4, 'Movie D', 3, 180);
+INSERT INTO movies VALUES (5, 'Movie E', 4, 120);
+```
+
+### Query Execution
+
+1. Execute the provided SQL query using a MySQL database management tool such as MySQL Workbench or command line.
+2. Review the results to ensure they meet the project requirements.
+
+## SQL Query
+
+```sql
+WITH CategoryFilmCount AS (
+    SELECT
+        categories.category_name AS CategoryName,
+        COUNT(movies.movie_id) AS FilmCount
+    FROM
+        categories
+    JOIN
+        movies
+    ON
+        categories.category_id = movies.category_id
+    GROUP BY
+        categories.category_name
+),
+CategoryAverageLength AS (
+    SELECT
+        categories.category_name AS CategoryName,
+        AVG(movies.length) AS AverageLength
+    FROM
+        categories
+    JOIN
+        movies
+    ON
+        categories.category_id = movies.category_id
+    GROUP BY
+        categories.category_name
+)
+SELECT
+    CategoryFilmCount.CategoryName,
+    CategoryFilmCount.FilmCount,
+    CategoryAverageLength.AverageLength
+FROM
+    CategoryFilmCount
+JOIN
+    CategoryAverageLength
+ON
+    CategoryFilmCount.CategoryName = CategoryAverageLength.CategoryName
+ORDER BY
+    CategoryFilmCount.FilmCount DESC;
+```
+
+## Query Explanation
+
+The query defines two Common Table Expressions (CTEs) to compute the count and average length of movies in each category. It then joins these CTEs and orders the results by the count of movies in descending order. The result set includes the category name, count of movies, and average length of movies in each category.
+
+## Expected Results
+
+The result set will have three columns: `CategoryName`, `FilmCount`, and `AverageLength`. Each row represents a movie category, the count of movies in that category, and the average length of movies in that category. The rows are ordered by `FilmCount` in descending order.
+
+![Query Results](output.png)
